@@ -262,7 +262,7 @@ Every modern browser by now (Chrome, Edge, Firefox) supports this method and acc
 
 ### For testing purposes
 
-There are several commands you can use or experiment with. I've stumpled upon and consider them (more or less) helpful while exploring this method to set up https for my local services, especially for the openwrt lucy web interface using openssl only (due to minimalistic approach/memory size reasons).
+There are several commands you can use or experiment with. I stumpled upon and consider them (more or less) helpful while exploring this method to set up https for my local services, especially for the openwrt lucy web interface using openssl only (due to minimalistic approach/memory size reasons).
 
 You can also convert your rootCA.pem to a .P12 format which is understood by android devices:
 ```
@@ -358,7 +358,7 @@ curl -v https://mylocalrouter.localdomain
 
 ### Credits
 
-In case of any problems you can also check out the following links which where helpful to me in the past (thanks to all):
+In case of any problems you can also check out the following links which where helpful to me in the past (thanks to all participants):
 - https://wiki.openssl.org/index.php/Command_Line_Utilities#Client_Certificates_AKA_pkcs12
 - https://gist.github.com/fntlnz/cf14feb5a46b2eda428e000157447309
 - https://superuser.com/questions/1202498/create-self-signed-certificate-with-subjectaltname-to-fix-missing-subjectaltnam/1202506#1202506
