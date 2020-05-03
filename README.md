@@ -242,7 +242,7 @@ For windows you first convert the **rootCA.pem** to the proper .DER format by is
 openssl x509 -outform der -in rootCA.pem -out rootCA.crt
 ```
 
-Now you are able to install the certificate by double-clicking the file, selecting the store location _current user_ (for me) or _local machine_ and by placing them in "Trusted Root Certification Authorities" store. Confirm the installation.
+Now you are able to install the certificate by double-clicking the file, selecting the store location _current user_ (for me) or _local machine_ and by placing them in "Trusted Root Certification Authorities" store. Confirm the installation. Run windows key + r, type "mmc", file -> add or remove snap-ins -> certificates -> add -> my user account > finish > ok, to verify that the certificate has been  installed successfully (afterwards check console root > certificates current user > Trusted Root Certification Authorities > certificates if the cert is listed there).
 
 For the Mozilla Firefox installation, open MF: Options > Certificates > View Certificates > Certificate Manager > Authorities and then import the root certification authority.
 
