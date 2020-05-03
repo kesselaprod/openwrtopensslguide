@@ -8,6 +8,8 @@ Assistance for establishing a ssl connection on openwrt lucy using openssl and w
 * PuTTY
 * OpenSSL
 
+***
+
 ## Getting started
 
 __Router preparations__:
@@ -60,6 +62,8 @@ Put them into the OpenSSL bin/im directory (e.g. C:\Program Files\OpenSSL-Win64\
 
 Now that the basics are done, we can proceed with the certificate generation.
 
+***
+
 ### Certificate Config Files
 
 We have three config files which we need to generate the certificate. These files are very important and they can also be found in this repo.
@@ -74,6 +78,8 @@ So the three config files are:
 3. 192.168.1.1.cnf
 
 You have to copy them into your OpenSSL bin directory (e.g. C:\Program Files\OpenSSL-Win64\bin) if you didn't change the paths in the config files.
+
+***
 
 ### Certificate Generation
 
@@ -185,7 +191,9 @@ openssl rand -hex 16 >> im/intermediateCA.serial
 openssl ca -in 192.168.1.1.csr.pem -config intermediateCA.cnf -out certs/192.168.1.1.pem -extensions server_ext
 ```
 
-And we are done. The last step is to install the certificates properly to get HTTPS working.
+And we are done. The last step is to install the certificates properly to get our own local HTTPS working.
+
+***
 
 ### Certificate Installation
 
@@ -195,19 +203,19 @@ I advise you to copy the needed files first from your OpenSSL bin directory to a
 
 What you need is:
 
-(listed in bin main directory)
-rootCA.pem
+(listed in bin main directory)    
+- rootCA.pem
 
-(listed in bin/certs directory)
-192.168.1.1.pem
-intermediateCA.pem
+(listed in bin/certs directory)     
+- 192.168.1.1.pem
+- intermediateCA.pem
 
-(listed in bin/crl)
-intermediateCA.crl
-rootCA.crl
+(listed in bin/crl)     
+- intermediateCA.crl
+- rootCA.crl
 
-(listed in bin/private)
-192.168.1.1.key.pem
+(listed in bin/private)    
+- 192.168.1.1.key.pem
 
 In your new directory (where you copied the above listed files to) open a new command prompt and issue the commands in this order to build the ssl certificate chain:
 ```
@@ -217,16 +225,31 @@ and
 ```
 type 192.168.1.1.pem cabundle.pem > uhttpd.pem
 ```
-("type" command only applies to ms windows)
+_("type" command only applies to ms windows)_
 
 Now rename your 
 
-"uhttpd.pem" to "uhttpd.crt" and 
-"192.168.1.1.key.pem" to "uhttpd.key" 
+"**uhttpd.pem**" to "**uhttpd.crt**" and   
+"**192.168.1.1.key.pem**" to "**uhttpd.key**"  
 
 (or choose another name if you altered the names in your uhttpd config file earlier).
 
 And upload them into your routers "/etc/" directory (or another directory if you changed the path in your uhttpd config file).
 
-As I mentioned before I created a "ssl" subdir in my routers /www/ folder. Here you can upload both .crl files (intermediateCA.crl and rootCA.crl) as well as the rootCA.pem + intermediateCA.pem. Notice that these files are also referenced in the config files. Change the location path if your config files are different or if you need to.
+As I mentioned before I created a "ssl" subdir in my routers /www/ folder. Here you can upload both .crl files (**intermediateCA.crl** and **rootCA.crl**) as well as the **rootCA.pem** + **intermediateCA.pem**. Notice that these files are also referenced in the config files. Change the location path if your config files are different.
+
+To finish the installation process, add the rootCA certificate to your machines trusted certificate store.
+
+For windows you first convert the **rootCA.pem** to the proper .DER format by issuing the following command
+```
+openssl x509 -outform der -in rootCA.pem -out rootCA.crt
+```
+
+Now you are able to install the certificate by double-clicking the file, selecting the store location _current user_ (for me) or _local machine_ and by placing them in "Trusted Root Certification Authorities" store. Confirm the installation and you are done.
+
+For the Mozilla Firefox installation, open Options > Certificates > View Certificates > Certificate Manager > Authorities and the import the root certification authority.
+
+You are now able to use
+
+https://192.168.1.1 respectively https://mylocalrouter.localdomain instead of the HTTP version. Every modern browser by now (Chrome, Edge, Firefox) supports this method and accepts the certificates as valid.
 
