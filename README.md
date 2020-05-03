@@ -188,3 +188,45 @@ openssl ca -in 192.168.1.1.csr.pem -config intermediateCA.cnf -out certs/192.168
 And we are done. The last step is to install the certificates properly to get HTTPS working.
 
 ### Certificate Installation
+
+This is a bit tricky, because we need to combine certificates, upload them to our router and add them to the trusted stores.
+
+I advise you to copy the needed files first from your OpenSSL bin directory to a new directory so you won't loose track of the important ones.
+
+What you need is:
+
+(listed in bin main directory)
+rootCA.pem
+
+(listed in bin/certs directory)
+192.168.1.1.pem
+intermediateCA.pem
+
+(listed in bin/crl)
+intermediateCA.crl
+rootCA.crl
+
+(listed in bin/private)
+192.168.1.1.key.pem
+
+In your new directory (where you copied the above listed files to) open a new command prompt and issue the commands in this order to build the ssl certificate chain:
+```
+type intermediateCA.pem rootCA.pem > cabundle.pem
+```
+and
+```
+type 192.168.1.1.pem cabundle.pem > uhttpd.pem
+```
+("type" command only applies to ms windows)
+
+Now rename your 
+
+"uhttpd.pem" to "uhttpd.crt" and 
+"192.168.1.1.key.pem" to "uhttpd.key" 
+
+(or choose another name if you altered the names in your uhttpd config file earlier).
+
+And upload them into your routers "/etc/" directory (or another directory if you changed the path in your uhttpd config file).
+
+As I mentioned before I created a "ssl" subdir in my routers /www/ folder. Here you can upload both .crl files (intermediateCA.crl and rootCA.crl) as well as the rootCA.pem + intermediateCA.pem. Notice that these files are also referenced in the config files. Change the location path if your config files are different or if you need to.
+
