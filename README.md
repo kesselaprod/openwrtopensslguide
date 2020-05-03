@@ -16,9 +16,11 @@ Make sure the required packages and software is installed (on your windows machi
 
 You also need to edit your /etc/config/uhttpd file and restart uhttpd afterwards to enable HTTPS. I have uploaded my uhttpd config file for comparison. Here you can also set the path to your server.key and server.crt (e.g. /etc/uhttpd.key and /etc/uhttpd.crt) which will be used to complete the chain.
 
+In addition I created a separate directory in /www/ called "ssl" (/www/ssl) to put the important certificates into for verification reasons. You can choose another directory, but then you have to edit the config files (see "Certificate Config Files" section).
+
 __Client preparations__:
 
-After installing OpenSSL on your windows machine, I highly recommend you to tweak your windows explorer context menu by adding the "open command prompt window here as administrator" (manual and registry file can be found here https://www.tenforums.com/tutorials/59686-open-command-window-here-administrator-add-windows-10-a.html). This is necessary because you need to operate in the openssl installation directory and openssl has the bad habit of getting a hiccup in the current command prompt window after issuing some commands so that you have to re-open the prompt in order to get the job done).
+After installing OpenSSL on your windows machine, I highly recommend you to tweak your windows explorer context menu by adding the "open command prompt window here as administrator" (manual and registry file can be found here https://www.tenforums.com/tutorials/59686-open-command-window-here-administrator-add-windows-10-a.html). This is necessary because you need to operate in the openssl installation directory and openssl has the bad habit of getting a hiccup in the current command prompt window after issuing some commands so that you have to re-open the prompt in order to get the job done.
 
 __Generate Certificates__:
 
@@ -54,6 +56,22 @@ Next create the following files for the intermediate certificate authority:
 * intermediateCA.index (empty file)
 * intermediateCA.serial (empty file)
 
-Put them into the OpenSSL bin/im directory (e.g. e.g. C:\Program Files\OpenSSL-Win64\bin\im)
+Put them into the OpenSSL bin/im directory (e.g. C:\Program Files\OpenSSL-Win64\bin\im)
 
 Now that the basics are done, we can proceed with the certificate generation.
+
+### Certificate Config Files
+
+We have three config files which we need to generate the certificate. These files are very important and they can also be found in this repo.
+
+I recommend you to take a look and alter them to fit your local ip and domain config. For instance you have to provide a Subject Alternative Name that matches your routers hostname + domain suffix you set earlier.
+
+In my case my routers ip is 192.168.1.1 and the hostname I've choosen for explanatory reasons here is http://mylocalrouter.localdomain
+
+So the three config files are:
+1. rootCA.cnf
+2. intermediateCA.cnf
+3. 192.168.1.1.cnf
+
+You'll have to copy them into your OpenSSL bin directory (e.g. (e.g. C:\Program Files\OpenSSL-Win64\bin) if you didn't change the paths in the config files.
+
