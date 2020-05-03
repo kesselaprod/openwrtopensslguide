@@ -22,7 +22,7 @@ In addition I created a separate directory in /www/ called "ssl" (/www/ssl) to p
 
 __Client preparations__:
 
-After installing OpenSSL on your windows machine, I highly recommend you to tweak your windows explorer context menu by adding the "open command prompt window here as administrator" (manual and registry file can be found here https://www.tenforums.com/tutorials/59686-open-command-window-here-administrator-add-windows-10-a.html). This is necessary because you need to operate in the openssl installation directory and openssl has the bad habit of getting a hiccup in the current command prompt window after issuing some commands so that you have to re-open the prompt in order to get the job done.
+After installing OpenSSL on your windows machine, I highly recommend you to tweak your windows explorer context menu by adding the "open command prompt window here as administrator" (manual and registry file can be found here https://www.tenforums.com/tutorials/59686-open-command-window-here-administrator-add-windows-10-a.html). This is necessary because you need to operate in the openssl installation directory and openssl (req) has the bad habit of getting a hiccup in the current command prompt window after issuing some commands so that you have to re-open the prompt in order to get the job done.
 
 __Generate Certificates__:
 
@@ -245,11 +245,60 @@ For windows you first convert the **rootCA.pem** to the proper .DER format by is
 openssl x509 -outform der -in rootCA.pem -out rootCA.crt
 ```
 
-Now you are able to install the certificate by double-clicking the file, selecting the store location _current user_ (for me) or _local machine_ and by placing them in "Trusted Root Certification Authorities" store. Confirm the installation and you are done.
+Now you are able to install the certificate by double-clicking the file, selecting the store location _current user_ (for me) or _local machine_ and by placing them in "Trusted Root Certification Authorities" store. Confirm the installation.
 
-For the Mozilla Firefox installation, open Options > Certificates > View Certificates > Certificate Manager > Authorities and the import the root certification authority.
+For the Mozilla Firefox installation, open MF: Options > Certificates > View Certificates > Certificate Manager > Authorities and then import the root certification authority.
+
+Restart uhttpd by putty SSH'ing the command
+
+```
+/etc/init.d/uhttpd restart
+```
+
+and you are done.
 
 You are now able to use
 
-https://192.168.1.1 respectively https://mylocalrouter.localdomain instead of the HTTP version. Every modern browser by now (Chrome, Edge, Firefox) supports this method and accepts the certificates as valid.
+https://192.168.1.1 respectively https://mylocalrouter.localdomain instead of the HTTP version. 
+
+Every modern browser by now (Chrome, Edge, Firefox) supports this method and accepts the certificates including the subject alternative names as valid by now.
+
+***
+
+There are several commands you can use or experiment with. I've stumpled upon and consider them (more or less) helpful while exploring this method to set up https for my local services, especially for the openwrt lucy web interface using openssl only (due to minimalistic approach/memory size reasons).
+
+You can also convert your rootCA.pem to a .P12 format which is understood by android devices:
+```
+openssl pkcs12 -export -in rootCA.pem -inkey rootCA.key.pem -out rootCA.p12
+```
+
+Or without entering the password separately:
+```
+openssl pkcs12 -export -nodes -out rootCA.p12 -inkey rootCA.key.pem -in rootCA.pem -passout pass:yourkeypasswordhere
+```
+
+You can remove the password you've set for the keys by typing:
+```
+openssl rsa -in rootCA.key.pem -out rootCA.key
+```
+
+You can rsa check the key:
+```
+openssl rsa -check -in 192.168.1.1.key.pem
+```
+
+You can transform the ascii base64 .PEM to binary .DER encoded format by issuing:
+```
+openssl x509 -outform der -in rootCA.pem -out rootCA.crt
+```
+
+This also works for .key file:
+```
+openssl rsa -in 192.168.1.1.key.pem -pubout -outform DER -out 192.168.1.1.key
+```
+
+To revoke server certificates with your own intermediate certificate authority, run this command in the OpenSSL bin main directory:
+```
+openssl ca -config intermediateCA.cnf -revoke certs/192.168.1.1.pem
+```
 
