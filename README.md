@@ -73,5 +73,118 @@ So the three config files are:
 2. intermediateCA.cnf
 3. 192.168.1.1.cnf
 
-You'll have to copy them into your OpenSSL bin directory (e.g. (e.g. C:\Program Files\OpenSSL-Win64\bin) if you didn't change the paths in the config files.
+You have to copy them into your OpenSSL bin directory (e.g. C:\Program Files\OpenSSL-Win64\bin) if you didn't change the paths in the config files.
 
+### Certificate Generation
+
+In your openssl bin directory (e.g. C:\Program Files\OpenSSL-Win64\bin) open your windows command prompt as admin and issue the following commands. During this you'll need to provide a password to protect the keys, you can choose whatever password you want.
+
+#### Generate Random File Content
+```
+openssl rand -out random.rnd -base64
+```
+
+#### Create a RootCA Certificate Signing Request (CSR) and the key
+```
+openssl req -new -config rootCA.cnf -out rootCA.csr.pem
+```
+
+#### Verify RootCA CSR
+```
+openssl req -verify -in rootCA.csr.pem -noout -text -reqopt no_version,no_pubkey,no_sigdump -nameopt multiline
+```
+
+#### Create RootCA serial
+```
+openssl rand -hex 16 >> rootCA.serial
+```
+
+Next you can change the *startdate* and *enddate* as you wish. I always renew my certificates every year so I've set the time appropriately in the format YearMonthDayHourMinuteSecond (YYYYmmddHHmmss). Notice the *extensions* argument which refers to the section defined in the rootCA.cnf file.
+
+#### Create and Self sign RootCA
+```
+openssl ca -selfsign -config rootCA.cnf -in rootCA.csr.pem -out rootCA.pem -extensions rootCA_ext -startdate 20200430120000Z -enddate 20210429235959Z
+```
+
+(at this step you should open a new command prompt)
+
+#### Show RootCA
+```
+openssl x509 -in rootCA.pem -noout -text -certopt no_version,no_pubkey,no_sigdump -nameopt multiline
+```
+
+#### Verify RootCA
+```
+openssl verify -verbose -CAfile rootCA.pem rootCA.pem
+```
+
+#### Create the RootCA certification revocation list (CRL)
+```
+openssl ca -gencrl -config rootCA.cnf -out crl/rootCA.crl
+```
+
+(new command prompt window)
+
+#### Create IntermediateCA CSR and the key
+```
+openssl req -new -config intermediateCA.cnf -out intermediateCA.csr.pem
+```
+
+#### Verify IntermediateCA CSR
+```
+openssl req -verify -in intermediateCA.csr.pem -noout -text -reqopt no_version,no_pubkey,no_sigdump -nameopt multiline
+```
+
+#### Create IntermediateCA serial
+```
+openssl rand -hex 16 >> rootCA.serial
+```
+
+(Notice: alter the date as you like. I always choose the same date range for the IntermediateCA and the RootCA)
+(new command prompt window)
+
+#### Create IntermediateCA and sign it with the RootCA
+```
+openssl ca -in intermediateCA.csr.pem -config rootCA.cnf -out certs/intermediateCA.pem -extensions v3_intermediateCA  -startdate 20200430120000Z -enddate 20210429235959Z
+```
+
+#### Show IntermediateCA
+```
+openssl x509 -in certs/intermediateCA.pem -noout -text -certopt no_version,no_pubkey,no_sigdump -nameopt multiline
+```
+
+#### Verify IntermediateCA
+```
+openssl verify -verbose -CAfile rootCA.pem certs/intermediateCA.pem
+```
+
+#### Create the Intermediate CA CRL
+```
+openssl ca -gencrl -config intermediateCA.cnf -out crl/intermediateCA.crl
+```
+
+Now we can start generating the certificate for our router/server running at 192.168.1.1 under http://mylocalrouter.localdomain
+
+#### Create server certificate CSR and the key
+```
+openssl req -new -config 192.168.1.1.cnf -extensions req_extensions -reqexts req_extensions -out 192.168.1.1.csr.pem
+```
+
+#### Create server certificate backup key (necessary)
+```
+openssl genrsa -out private/192.168.1.1.backup.key.pem 3072
+```
+
+#### Create intermediateCA serial
+```
+openssl rand -hex 16 >> im/intermediateCA.serial
+```
+
+#### Create server certificate and sign it with the intermediateCA
+```
+openssl ca -in 192.168.1.1.csr.pem -config intermediateCA.cnf -out certs/192.168.1.1.pem -extensions server_ext
+```
+
+And we are done. The last step is to install the certificates properly to get HTTPS working.
+
+### Certificate Installation
