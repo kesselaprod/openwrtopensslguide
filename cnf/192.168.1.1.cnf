@@ -1,0 +1,20 @@
+HOME                        = .
+RANDFILE                    = random.rnd
+
+[ req ]
+default_bits		        = 3072
+default_keyfile             = ./private/192.168.1.1.key.pem
+encrypt_key                 = no
+default_md                  = sha256
+req_extensions              = req_extensions
+prompt                      = no
+distinguished_name          = req_distinguished_name
+
+[ req_extensions ]
+keyUsage                    = digitalSignature, keyEncipherment
+extendedKeyUsage            = serverAuth, clientAuth
+subjectKeyIdentifier        = hash
+subjectAltName              = DNS:mylocalrouter.localdomain,IP:192.168.1.1,DNS:192.168.1.1,DNS:*.mylocalrouter.localdomain
+
+[ req_distinguished_name ]
+commonName                  = mylocalrouter.localdomain
