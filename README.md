@@ -6,7 +6,7 @@ Assistance for establishing a ssl connection on openwrt lucy using openssl and w
 * Router with OpenWRT (I'm using OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.051.55698-76cf653) on TP-Link TL-WR1043N/ND v1
 * libopenssl, luci-ssl (packages installed via opkg install) and uhttpd 
 * PuTTY
-* OpenSSL
+* OpenSSL (make sure the path to the .exe has been added to your environment variables!)
 
 ***
 
@@ -112,8 +112,6 @@ Next you can change the *startdate* and *enddate* as you wish. I always renew my
 openssl ca -selfsign -config rootCA.cnf -in rootCA.csr.pem -out rootCA.pem -extensions rootCA_ext -startdate 20200430120000Z -enddate 20210429235959Z
 ```
 
-(at this step you should open a new command prompt)
-
 #### Show RootCA
 ```
 openssl x509 -in rootCA.pem -noout -text -certopt no_version,no_pubkey,no_sigdump -nameopt multiline
@@ -128,8 +126,6 @@ openssl verify -verbose -CAfile rootCA.pem rootCA.pem
 ```
 openssl ca -gencrl -config rootCA.cnf -out crl/rootCA.crl
 ```
-
-(new command prompt window)
 
 #### Create IntermediateCA CSR and the key
 ```
@@ -147,7 +143,6 @@ openssl rand -hex 16 >> rootCA.serial
 ```
 
 (Notice: alter the date as you like. I always choose the same date range for the IntermediateCA and the RootCA)
-(new command prompt window)
 
 #### Create IntermediateCA and sign it with the RootCA
 ```
@@ -191,7 +186,7 @@ openssl rand -hex 16 >> im/intermediateCA.serial
 openssl ca -in 192.168.1.1.csr.pem -config intermediateCA.cnf -out certs/192.168.1.1.pem -extensions server_ext
 ```
 
-And we are done. The last step is to install the certificates properly to get our own local HTTPS working.
+And we are done generating the files. The last step is to install the certificates properly to get our own local HTTPS working.
 
 ***
 
@@ -199,7 +194,7 @@ And we are done. The last step is to install the certificates properly to get ou
 
 This is a bit tricky, because we need to combine certificates, upload them to our router and add them to the trusted stores.
 
-I advise you to copy the needed files first from your OpenSSL bin directory to a new directory so you won't loose track of the important ones.
+I advise you to copy the needed files first from your OpenSSL bin directory to a new directory so you won't lose track of the important ones.
 
 What you need is:
 
@@ -265,6 +260,8 @@ Every modern browser by now (Chrome, Edge, Firefox) supports this method and acc
 
 ***
 
+### For testing purposes
+
 There are several commands you can use or experiment with. I've stumpled upon and consider them (more or less) helpful while exploring this method to set up https for my local services, especially for the openwrt lucy web interface using openssl only (due to minimalistic approach/memory size reasons).
 
 You can also convert your rootCA.pem to a .P12 format which is understood by android devices:
@@ -302,3 +299,70 @@ To revoke server certificates with your own intermediate certificate authority, 
 openssl ca -config intermediateCA.cnf -revoke certs/192.168.1.1.pem
 ```
 
+Convert .DER back to .PEM using x509
+```
+x509 -in rootCA.crt -out rootCA.pem -outform PEM
+```
+
+Same as above but more specific
+```
+openssl x509 -inform DER -in rootCA.crt -outform PEM -out rootCA.pem
+```
+
+Get the .PEM certificate hash
+```
+openssl x509 -inform PEM -subject_hash -in rootCA.pem
+```
+
+Test certificate purpose
+```
+openssl x509 -purpose -in rootCA.pem -inform PEM
+```
+
+Examine CSR
+```
+openssl x509 -in rootCA.csr.pem -noout -text
+```
+
+Verify CSR
+```
+openssl req -text -noout -verify -in rootCA.csr.pem
+```
+
+Examine CRT
+```
+x509 -in uhttpd.crt -noout -text
+```
+
+Examine PEM
+```
+x509 -in rootCA.pem -text -noout
+```
+
+OpenSSL client chain test
+```
+openssl s_client -connect mylocalrouter.localdomain:443
+```
+
+OpenSSL client chain test verbose
+```
+openssl s_client -showcerts -connect mylocalrouter.localdomain:443 -CAfile cabundle.pem
+```
+
+Curl verbose
+```
+curl -v https://mylocalrouter.localdomain
+```
+
+***
+
+### Credits
+
+In case of any problems you can also check out the following links which where helpful to me in the past (thanks to all):
+- https://wiki.openssl.org/index.php/Command_Line_Utilities#Client_Certificates_AKA_pkcs12
+- https://gist.github.com/fntlnz/cf14feb5a46b2eda428e000157447309
+- https://superuser.com/questions/1202498/create-self-signed-certificate-with-subjectaltname-to-fix-missing-subjectaltnam/1202506#1202506
+- http://openssl.6102.n7.nabble.com/quot-critical-CA-FALSE-quot-but-quot-Any-Purpose-CA-Yes-quot-td29933.html
+- https://deliciousbrains.com/https-locally-without-browser-privacy-errors/#creating-self-signed-certificate
+- https://deliciousbrains.com/ssl-certificate-authority-for-local-https-development/
+- https://stackoverflow.com/questions/21297139/how-do-you-sign-a-certificate-signing-request-with-your-certification-authority
