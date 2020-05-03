@@ -1,6 +1,8 @@
 # OpenWRT Lucy HTTPS OpenSSL Guide on Windows
 Assistance for establishing a ssl connection on openwrt lucy using openssl and windows 10. This is my way on how to create and use ssl certificates. No guarantee this will work for you, I'm not an expert either! I won't give any support, so if you run into trouble, take your time to figure out what has to be done.
 
+Last revision: 05-03-2020
+
 ## Prerequisite
 * Windows 10 (I'm using Pro Build 1909) client
 * Router with OpenWRT (I'm using OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.051.55698-76cf653) on TP-Link TL-WR1043N/ND v1
