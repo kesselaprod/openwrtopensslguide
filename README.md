@@ -3,10 +3,6 @@ Assistance for establishing a ssl connection on openwrt lucy using openssl and w
 
 Last revision: 05-24-2020
 
-ToDo:
-
-The command 'ca' uses the openssl default config so we need to rename rootCA.cnf to openssl.cnf and replace it in C:\Program Files\OpenSSL-Win64\bin\cnf\openssl.cnf before self signing the cert
-
 ## Prerequisite
 * Windows 10 (I'm using Pro Build 1909) client
 * Router with OpenWRT (I'm using OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.051.55698-76cf653) on TP-Link TL-WR1043N/ND v1
@@ -83,7 +79,16 @@ So the three config files are:
 2. intermediateCA.cnf
 3. 192.168.1.1.cnf
 
-You have to copy them into your OpenSSL bin directory (e.g. C:\Program Files\OpenSSL-Win64\bin) if you didn't change the paths in the config files.
+You have to copy them into your OpenSSL bin directory (e.g. _C:\Program Files\OpenSSL-Win64\bin_) if you didn't change the paths in the config files.
+
+**Special note:** in the following step we are about to use an openssl subcommand/tool named '**ca**' which is used to self sign our root authority certificate. This requires us to 
+
+1. backup the existing openssl default config file (_C:\Program Files\OpenSSL-Win64\bin\cnf\openssl.cnf_)
+2. copy your **rootCA.cnf** into _C:\Program Files\OpenSSL-Win64\bin\cnf\_
+3. recycle the original openssl default config file and rename your **rootCA.cnf** into **openssl.cnf**
+
+source:
+[openSSL sign https_client certificate with CA (Stackoverflow)](https://stackoverflow.com/a/32096337)
 
 ***
 
