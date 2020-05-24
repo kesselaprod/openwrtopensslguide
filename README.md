@@ -1,7 +1,11 @@
 # OpenWRT Lucy HTTPS OpenSSL Guide on Windows
 Assistance for establishing a ssl connection on openwrt lucy using openssl and windows 10. This is my way on how to create and use ssl certificates. No guarantee this will work for you, I'm not an expert either! I won't give any support, so if you run into trouble, take your time to figure out what has to be done.
 
-Last revision: 05-03-2020
+Last revision: 05-24-2020
+
+ToDo:
+
+The command 'ca' uses the openssl default config so we need to rename rootCA.cnf to openssl.cnf and replace it in C:\Program Files\OpenSSL-Win64\bin\cnf\openssl.cnf before self signing the cert
 
 ## Prerequisite
 * Windows 10 (I'm using Pro Build 1909) client
