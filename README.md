@@ -236,10 +236,7 @@ type 192.168.1.1.pem cabundle.pem > uhttpd.pem
 ```
 *(The **type** command applies to ms windows only)*
 
-Now rename your 
-
-"**uhttpd.pem**" to "**uhttpd.crt**" and   
-"**192.168.1.1.key.pem**" to "**uhttpd.key**"  
+Now rename your **uhttpd.pem** to **uhttpd.crt** and **192.168.1.1.key.pem** to **uhttpd.key**.
 
 (or choose another name if you altered the names in your uhttpd config file earlier).
 
