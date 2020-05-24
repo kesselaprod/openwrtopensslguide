@@ -1,14 +1,15 @@
 # OpenWRT Lucy HTTPS OpenSSL Guide on Windows
 Assistance for establishing a ssl connection on openwrt lucy using openssl and windows 10. This is my way on how to create and use ssl certificates. No guarantee this will work for you, I'm not an expert either! I won't give any support, so if you run into trouble, take your time to figure out what has to be done.
 
-Last revision: 05-24-2020
+Last revision: *05-24-2020*
 
 ## Prerequisite
-* Windows 10 (I'm using Pro Build 1909) client
-* Router with OpenWRT (I'm using OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.051.55698-76cf653) on TP-Link TL-WR1043N/ND v1
-* libopenssl, luci-ssl (packages installed via opkg install) and uhttpd 
-* PuTTY
-* OpenSSL (make sure the path to the .exe has been added to your environment variables!)
+* **Windows 10** (I'm using *Pro Build 1909*) client
+* Router with the latest OpenWRT firmware (I'm using *OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.051.55698-76cf653)* on *TP-Link TL-WR1043N/ND v1*)
+* **libopenssl**, **luci-ssl** (packages installed via `opkg update` & `opkg install`) and uhttpd webserver 
+* **PuTTY**
+* **FTP Client** for file transfer between your client computer and your router. A pretty solid recommendation is **WinSCP** or **FileZilla** for Windows. 
+* **OpenSSL** (make sure the path to the .exe has been added to your environment variables!)
 
 ***
 
@@ -16,15 +17,17 @@ Last revision: 05-24-2020
 
 __Router preparations__:
 
-Make sure the required packages and software is installed (on your windows machine as well as on your router). If you didn't have already, define a hostname in your Lucy web interface (System > System Properties > General Settings > Hostname) and choose a local domain name for your server (Network > DHCP and DNS > Server Settings > General Settings > Local server + Local domain) (make sure your domain suffix matches your local server domain specification) (see images)
+Make sure the required packages and software is installed (on your windows machine as well as on your router). If you didn't have already, define a hostname in your Lucy web interface (*System > System Properties > General Settings > Hostname*) and choose a local domain name for your server (*Network > DHCP and DNS > Server Settings > General Settings > Local server + Local domain*) (make sure your domain suffix matches your local server domain specification):
 
-You also need to edit your /etc/config/uhttpd file and restart uhttpd afterwards to enable HTTPS. I have uploaded my uhttpd config file for comparison. Here you can also set the path to your server.key and server.crt (e.g. /etc/uhttpd.key and /etc/uhttpd.crt) which will be used to complete the chain.
+![alt OpenwrtLucyLocalserverdomain](https://github.com/kesselaprod/openwrtopensslguide/blob/master/images/localserver_localdomain.png?raw=true)   
 
-In addition I created a separate directory in /www/ called "ssl" (/www/ssl) to put the important certificates into for verification reasons. You can choose another directory, but then you have to edit the config files (see "Certificate Config Files" section).
+You also need to edit your */etc/config/**uhttpd*** file and restart uhttpd afterwards to enable HTTPS. I uploaded my uhttpd config file for comparison. Here you can also set the path to your **server.key** and **server.crt** (e.g. */etc/**uhttpd.key*** and */etc/**uhttpd.crt***) which will be used to complete the chain.
+
+In addition I created a separate directory in */www/* called **ssl** (*/www/ssl*) to put the important certificates into for verification reasons. You can choose another directory, but then you have to edit the config files (see **Certificate Config Files** section).
 
 __Client preparations__:
 
-After installing OpenSSL on your windows machine, I highly recommend you to tweak your windows explorer context menu by adding the "open command prompt window here as administrator" (manual and registry file can be found here https://www.tenforums.com/tutorials/59686-open-command-window-here-administrator-add-windows-10-a.html). This is necessary because you need to operate in the openssl installation directory and openssl (req) has the bad habit of getting a hiccup in the current command prompt window after issuing some commands so that you have to re-open the prompt in order to get the job done.
+After installing OpenSSL on your windows machine, I highly recommend you to tweak your windows explorer context menu by adding the **open command prompt window here as administrator** (manual and registry file can be found here https://www.tenforums.com/tutorials/59686-open-command-window-here-administrator-add-windows-10-a.html). This is necessary because you need to operate in the openssl installation directory and openssl (req) has the bad habit of getting a hiccup in the current command prompt window after issuing some commands so that you have to re-open the prompt in order to get the job done.
 
 __Generate Certificates__:
 
@@ -32,35 +35,35 @@ Here comes the fun part. Took me countless hours to figure this out and ofc I do
 
 In order to complete the ssl chain we need a root authority certificate, an intermediate authority certificate and a server certificate for the router.
 
-First you need to create some directories in your OpenSSL bin directory (e.g. C:\Program Files\OpenSSL-Win64\bin):
+First you need to create some directories in your OpenSSL bin directory (e.g. *C:\Program Files\OpenSSL-Win64\bin*):
 
-- certreqs
-- certs
-- crl
-- im
-  - im/certreqs
-  - im/certs
-  - im/crl
-  - im/newcerts
-  - im/private
-- newcerts
-- private
+- *certreqs*
+- *certs*
+- *crl*
+- *im*
+  - *im/certreqs*
+  - *im/certs*
+  - *im/crl*
+  - *im/newcerts*
+  - *im/private*
+- *newcerts*
+- *private*
 
-Then you have to create some necessary files (you can also find them in my repo in "certificatefiles") (notice the extension is important):
+Next create and save some necessary files with the specific name.extension and text-content listed below ([repo link](certificatefiles/)):
 
-* random.rnd (empty file)
-* rootCA.crlnum (only write "1000" without quotes in it and save)
-* rootCA.index (empty file)
-* rootCA.serial (empty file)
+* name.extension: **random.rnd** text-content:
+* name.extension: **rootCA.crlnum** text-content: **1000**
+* name.extension: **rootCA.index** text-content:
+* name.extension: **rootCA.serial** text-content: **01**
 
-Put them into the OpenSSL bin main directory (e.g. C:\Program Files\OpenSSL-Win64\bin).
+Put them into the OpenSSL bin main directory (e.g. *C:\Program Files\OpenSSL-Win64\bin*).
 
-Next create the following files for the intermediate certificate authority:
-* intermediateCA.crlnum (only write "1000" without quotes in it and save)
-* intermediateCA.index (empty file)
-* intermediateCA.serial (empty file)
+Then keep creating the following files for the intermediate certificate authority:
+* name.extension: **intermediateCA.crlnum** text-content: **1000**
+* name.extension: **intermediateCA.index** text-content:
+* name.extension: **intermediateCA.serial** text-content: **01**
 
-Put them into the OpenSSL bin/im directory (e.g. C:\Program Files\OpenSSL-Win64\bin\im)
+Put them into the OpenSSL bin/im directory (e.g. *C:\Program Files\OpenSSL-Win64\bin\im*)
 
 Now that the basics are done, we can proceed with the certificate generation.
 
@@ -72,19 +75,19 @@ We have three config files which we need to generate the certificate. These file
 
 I recommend you to take a look and alter them to fit your local ip and domain config. For instance you have to provide a Subject Alternative Name that matches your routers hostname + domain suffix you set earlier.
 
-In my case my routers ip is 192.168.1.1 and the hostname I've choosen for explanatory reasons here is http://mylocalrouter.localdomain
+In my case my routers ip is **192.168.1.1** and the hostname I've choosen for explanatory reasons here is *http://mylocalrouter.localdomain*
 
 So the three config files are:
-1. rootCA.cnf
-2. intermediateCA.cnf
-3. 192.168.1.1.cnf
+1. **rootCA.cnf**
+2. **intermediateCA.cnf**
+3. **192.168.1.1.cnf**
 
-You have to copy them into your OpenSSL bin directory (e.g. _C:\Program Files\OpenSSL-Win64\bin_) if you didn't change the paths in the config files.
+Copy all of them into your OpenSSL bin directory (e.g. *C:\Program Files\OpenSSL-Win64\bin*) if you didn't change the paths in the config files.
 
 **Special note:** in the following step we are about to use an openssl subcommand/tool named '**ca**' which is used to self sign our root authority certificate. This requires us to 
 
-1. backup the existing openssl default config file (_C:\Program Files\OpenSSL-Win64\bin\cnf\openssl.cnf_)
-2. copy your **rootCA.cnf** into _C:\Program Files\OpenSSL-Win64\bin\cnf\_
+1. backup the existing openssl default config file (*C:\Program Files\OpenSSL-Win64\bin\cnf\openssl.cnf*)
+2. copy your **rootCA.cnf** into *C:\Program Files\OpenSSL-Win64\bin\cnf\*
 3. recycle the original openssl default config file and rename your **rootCA.cnf** into **openssl.cnf**
 
 source:
@@ -94,7 +97,7 @@ source:
 
 ### Certificate Generation
 
-In your openssl bin directory (e.g. C:\Program Files\OpenSSL-Win64\bin) open your windows command prompt as admin and issue the following commands. During this you'll need to provide a password to protect the keys, you can choose whatever password you want.
+In your openssl bin directory (e.g. *C:\Program Files\OpenSSL-Win64\bin*) open your windows command prompt as admin and issue the following commands. During this you'll need to provide a password to protect the keys, you can choose whatever password you want.
 
 #### Generate Random File Content
 ```
@@ -116,7 +119,7 @@ openssl req -verify -in rootCA.csr.pem -noout -text -reqopt no_version,no_pubkey
 openssl rand -hex 16 >> rootCA.serial
 ```
 
-Next you can change the *startdate* and *enddate* as you wish. I always renew my certificates every year so I've set the time appropriately in the format YearMonthDayHourMinuteSecond (YYYYmmddHHmmss). Notice the *extensions* argument which refers to the section defined in the rootCA.cnf file.
+Next you can change the *startdate* and *enddate* as you wish. I always renew my certificates every year so I've set the time appropriately in the format *YearMonthDayHourMinuteSecond* (**YYYYmmddHHmmss**). Notice the *extensions* argument which refers to the section defined in the **rootCA.cnf** file.
 
 #### Create and Self sign RootCA
 ```
@@ -153,7 +156,7 @@ openssl req -verify -in intermediateCA.csr.pem -noout -text -reqopt no_version,n
 openssl rand -hex 16 >> rootCA.serial
 ```
 
-(Notice: alter the date as you like. I always choose the same date range for the IntermediateCA and the RootCA)
+(**Notice**: alter the date as you like. I always choose the same date range for my IntermediateCA and the RootCA)
 
 #### Create IntermediateCA and sign it with the RootCA
 ```
@@ -175,7 +178,7 @@ openssl verify -verbose -CAfile rootCA.pem certs/intermediateCA.pem
 openssl ca -gencrl -config intermediateCA.cnf -out crl/intermediateCA.crl
 ```
 
-Now we can start generating the certificate for our router/server running at 192.168.1.1 under http://mylocalrouter.localdomain
+Now we can start generating the certificate for our router/server running at **192.168.1.1** under *http://mylocalrouter.localdomain*
 
 #### Create server certificate CSR and the key
 ```
@@ -209,19 +212,19 @@ I advise you to copy the needed files first from your OpenSSL bin directory to a
 
 What you need is:
 
-(listed in bin main directory)    
-- rootCA.pem
+(listed in *bin* directory)    
+- **rootCA.pem**
 
-(listed in bin/certs directory)     
-- 192.168.1.1.pem
-- intermediateCA.pem
+(listed in *bin/certs* directory)     
+- **192.168.1.1.pem**
+- **intermediateCA.pem**
 
-(listed in bin/crl)     
-- intermediateCA.crl
-- rootCA.crl
+(listed in *bin/crl*)     
+- **intermediateCA.crl**
+- **rootCA.crl**
 
-(listed in bin/private)    
-- 192.168.1.1.key.pem
+(listed in *bin/private*)    
+- **192.168.1.1.key.pem**
 
 In your new directory (where you copied the above listed files to) open a new command prompt and issue the commands in this order to build the ssl certificate chain:
 ```
@@ -231,7 +234,7 @@ and
 ```
 type 192.168.1.1.pem cabundle.pem > uhttpd.pem
 ```
-_("type" command only applies to ms windows)_
+*(The **type** command applies to ms windows only)*
 
 Now rename your 
 
@@ -240,9 +243,9 @@ Now rename your
 
 (or choose another name if you altered the names in your uhttpd config file earlier).
 
-And upload them into your routers "/etc/" directory (or another directory if you changed the path in your uhttpd config file).
+And upload them into your routers */etc/* directory (or another directory if you changed the path in your uhttpd config file).
 
-As I mentioned before I created a "ssl" subdir in my routers /www/ folder. Here you can upload both .crl files (**intermediateCA.crl** and **rootCA.crl**) as well as the **rootCA.pem** + **intermediateCA.pem**. Notice that these files are also referenced in the config files. Change the location path if your config files are different.
+As I mentioned before I created a **ssl** subdir in my routers */www/* folder. Here you can upload both .crl files (**intermediateCA.crl** and **rootCA.crl**) as well as the **rootCA.pem** + **intermediateCA.pem**. Notice that these files are also referenced in the config files. Change the location path if your config files are different.
 
 To finish the installation process, add the rootCA certificate to your machines trusted certificate store.
 
@@ -251,9 +254,13 @@ For windows you first convert the **rootCA.pem** to the proper .DER format by is
 openssl x509 -outform der -in rootCA.pem -out rootCA.crt
 ```
 
-Now you are able to install the certificate by double-clicking the file, selecting the store location _current user_ (for me) or _local machine_ and by placing them in "Trusted Root Certification Authorities" store. Confirm the installation. Run windows key + r, type "mmc", file -> add or remove snap-ins -> certificates -> add -> my user account > finish > ok, to verify that the certificate has been  installed successfully (afterwards check console root > certificates current user > Trusted Root Certification Authorities > certificates if the cert is listed there).
+Now you are able to install the certificate by double-clicking the file, selecting the store location *current user* (for me) or *local machine* and by placing them in **Trusted Root Certification Authorities** store. Confirm the installation.
 
-For the Mozilla Firefox installation, open MF: Options > Certificates > View Certificates > Certificate Manager > Authorities and then import the root certification authority.
+To verify that the certificate has been installed successfully, do the following:
+- run **windows key + r**, type **mmc** and click *file -> add or remove snap-ins -> certificates -> add -> my user account > finish > ok* 
+- check *console root > certificates current user > Trusted Root Certification Authorities > certificates* to confirm your cert is listed there
+
+For the Mozilla Firefox installation, open your browser and click *Options > Privacy & Security > Certificates > View Certificates > Certificate Manager > Authorities* and import the root certification authority by hitting the *Import...* button.
 
 Restart uhttpd by putty SSH'ing the command
 
@@ -265,7 +272,7 @@ and you are done.
 
 You are now able to use
 
-https://192.168.1.1 respectively https://mylocalrouter.localdomain instead of the HTTP version. 
+*https://192.168.1.1* respectively *https://mylocalrouter.localdomain* instead of the HTTP version. 
 
 Every modern browser by now (Chrome, Edge, Firefox) supports this method and accepts the certificates including the subject alternative names as valid by now.
 
@@ -275,7 +282,7 @@ Every modern browser by now (Chrome, Edge, Firefox) supports this method and acc
 
 There are several commands you can use or experiment with. I stumpled upon and consider them (more or less) helpful while exploring this method to set up https for my local services, especially for the openwrt lucy web interface using openssl only (due to minimalistic approach/memory size reasons).
 
-You can also convert your rootCA.pem to a .P12 format which is understood by android devices:
+You can also convert your **rootCA.pem** to a .P12 format which is understood by android devices:
 ```
 openssl pkcs12 -export -in rootCA.pem -inkey rootCA.key.pem -out rootCA.p12
 ```
@@ -305,7 +312,7 @@ This also works for .key file:
 openssl rsa -in 192.168.1.1.key.pem -pubout -outform DER -out 192.168.1.1.key
 ```
 
-To revoke server certificates with your own intermediate certificate authority, run this command in the OpenSSL bin main directory:
+To revoke server certificates with your own intermediate certificate authority, run this command in the OpenSSL *bin* main directory:
 ```
 openssl ca -config intermediateCA.cnf -revoke certs/192.168.1.1.pem
 ```
