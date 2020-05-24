@@ -86,9 +86,9 @@ Copy all of them into your OpenSSL bin directory (e.g. *C:\Program Files\OpenSSL
 
 **Special note:** in the following step we are about to use an openssl subcommand/tool named '**ca**' which is used to self sign our root authority certificate. This requires us to 
 
-1. backup the existing openssl default config file (*C:\Program Files\OpenSSL-Win64\bin\cnf\openssl.cnf*)
-2. copy your **rootCA.cnf** into *C:\Program Files\OpenSSL-Win64\bin\cnf\*
-3. recycle the original openssl default config file and rename your **rootCA.cnf** into **openssl.cnf**
+1. backup the existing openssl default config file (*C:\Program Files\OpenSSL-Win64\bin\cnf\\**openssl.cnf***)
+2. copy your **rootCA.cnf** into the appropriate directory (*C:\Program Files\OpenSSL-Win64\bin\cnf*)
+3. recycle the original openssl default config file (*C:\Program Files\OpenSSL-Win64\bin\cnf\\**openssl.cnf***) and rename your **rootCA.cnf** into **openssl.cnf**
 
 source:
 [openSSL sign https_client certificate with CA (Stackoverflow)](https://stackoverflow.com/a/32096337)
