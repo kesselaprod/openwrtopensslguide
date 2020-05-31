@@ -3,6 +3,10 @@ Assistance for establishing a ssl connection on openwrt lucy using openssl and w
 
 Last revision: *05-24-2020*
 
+ToDo
+
+Server/router cert does not need to be bundled. Just rename server.pem to uhttpd.crt and copy it to /etc/
+
 ## Prerequisite
 * **Windows 10** (I'm using *Pro Build 1909*) client
 * Router with the latest OpenWRT firmware (I'm using *OpenWrt 18.06.2 r7676-cddd7b4c77 / LuCI openwrt-18.06 branch (git-19.051.55698-76cf653)* on *TP-Link TL-WR1043N/ND v1*)
