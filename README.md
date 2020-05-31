@@ -1,11 +1,12 @@
 # OpenWRT Lucy HTTPS OpenSSL Guide on Windows
 Assistance for establishing a ssl connection on openwrt lucy using openssl and windows 10. This is my way on how to create and use ssl certificates. No guarantee this will work for you, I'm not an expert either! I won't give any support, so if you run into trouble, take your time to figure out what has to be done.
 
-Last revision: *05-24-2020*
+Last revision: *05-31-2020*
 
 ToDo
 
-Server/router cert does not need to be bundled. Just rename server.pem to uhttpd.crt and copy it to /etc/
+- Server/router cert does not need to be bundled. Just rename server.pem to uhttpd.crt and copy it to "/etc/"
+- well seems we can simply rename rootCA.pem to rootCA.crt and intermediateCA.pem to intermediateCA.crt in order to install the chain properly (add them both to the trusted certificate store for them work)
 
 ## Prerequisite
 * **Windows 10** (I'm using *Pro Build 1909*) client
