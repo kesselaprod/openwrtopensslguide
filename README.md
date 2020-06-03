@@ -252,7 +252,7 @@ Now rename your **uhttpd.pem** to **uhttpd.crt** and **192.168.1.1.key.pem** to 
 
 Simply rename **192.168.1.1.pem** to **uhttpd.crt** and **192.168.1.1.key.pem** to **uhttpd.key**.   
 
-
+   
 
 And upload them to your routers */etc/* directory (or another directory if you changed the path in your uhttpd config file).
 
@@ -262,11 +262,11 @@ To finish the installation process:
 1. **(Bundled)** add the rootCA certificate to your machines trusted certificate store.
 2. **(Raw)** add the rootCA as well as the intermediateCA certificate to your machines trusted certificate store.
 
-~~For windows you first convert the **rootCA.pem** to the proper .DER format by issuing the following command
+~~For windows you first convert the **rootCA.pem** to the proper .DER format by issuing the following command~~
 ```
 openssl x509 -outform der -in rootCA.pem -out rootCA.crt
 ```
-~~
+
 Update: I figured out that you don't even have to convert the certificates into proper format. Simply rename:
 1. **(Bundled)** **rootCA.pem** to **rootCA.crt**
 2. **(Raw)** **rootCA.pem** to **rootCA.crt** and **intermediateCA.pem** to **intermediateCA.crt**
