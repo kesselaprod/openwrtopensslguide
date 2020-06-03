@@ -1,12 +1,7 @@
 # OpenWRT Lucy HTTPS OpenSSL Guide on Windows
 Assistance for establishing a ssl connection on openwrt lucy using openssl and windows 10. This is my way on how to create and use ssl certificates. No guarantee this will work for you, I'm not an expert either! I won't give any support, so if you run into trouble, take your time to figure out what has to be done.
 
-Last revision: *05-31-2020*
-
-ToDo
-
-- Server/router cert does not need to be bundled. Just rename server.pem to uhttpd.crt and copy it to "/etc/"
-- well seems we can simply rename rootCA.pem to rootCA.crt and intermediateCA.pem to intermediateCA.crt in order to install the chain properly (add them both to the trusted certificate store for them work)
+Last revision: *06-03-2020*
 
 ## Prerequisite
 * **Windows 10** (I'm using *Pro Build 1909*) client
@@ -211,7 +206,7 @@ And we are done generating the files. The last step is to install the certificat
 
 ### Certificate Installation
 
-This is a bit tricky, because we need to combine certificates, upload them to our router and add them to the trusted stores.
+This is a bit tricky, because we need to upload the proper certificates to our router and add them to the trusted stores on our client devices.
 
 I advise you to copy the needed files first from your OpenSSL bin directory to a new directory so you won't lose track of the important ones.
 
@@ -231,6 +226,14 @@ What you need is:
 (listed in *bin/private*)    
 - **192.168.1.1.key.pem**
 
+**Special Note**:
+
+By now I did this on two different networks. On my main network (*TL-WR1043N/ND v1* as gateway) I have to bundle the certificates in order to get the ssl verification chain working. On a foreign network (with *TL-WDR4900 V1* as router) OpenWRT throws me an exception with an log entry stating that uhttpd crashed while loading the bundled certificates.  
+
+If you experience any issues with this first **(1)** method, I advise you to try the other one **(2)**.
+
+#### (1) Bundle certificates
+
 In your new directory (where you copied the above listed files to) open a new command prompt and issue the commands in this order to build the ssl certificate chain:
 ```
 type intermediateCA.pem rootCA.pem > cabundle.pem
@@ -245,18 +248,31 @@ Now rename your **uhttpd.pem** to **uhttpd.crt** and **192.168.1.1.key.pem** to 
 
 (or choose another name if you altered the names in your uhttpd config file earlier).
 
-And upload them into your routers */etc/* directory (or another directory if you changed the path in your uhttpd config file).
+#### (2) Raw certificates
+
+Simply rename **192.168.1.1.pem** to **uhttpd.crt** and **192.168.1.1.key.pem** to **uhttpd.key**.   
+
+
+
+And upload them to your routers */etc/* directory (or another directory if you changed the path in your uhttpd config file).
 
 As I mentioned before I created a **ssl** subdir in my routers */www/* folder. Here you can upload both .crl files (**intermediateCA.crl** and **rootCA.crl**) as well as the **rootCA.pem** + **intermediateCA.pem**. Notice that these files are also referenced in the config files. Change the location path if your config files are different.
 
-To finish the installation process, add the rootCA certificate to your machines trusted certificate store.
+To finish the installation process:
+1. (Bundled)** add the rootCA certificate to your machines trusted certificate store.
+2. (Raw)** add the rootCA as well as the intermediateCA certificate to your machines trusted certificate store.
 
-For windows you first convert the **rootCA.pem** to the proper .DER format by issuing the following command
+~~For windows you first convert the **rootCA.pem** to the proper .DER format by issuing the following command
 ```
 openssl x509 -outform der -in rootCA.pem -out rootCA.crt
 ```
+~~
 
-Now you are able to install the certificate by double-clicking the file, selecting the store location *current user* (for me) or *local machine* and by placing them in **Trusted Root Certification Authorities** store. Confirm the installation.
+Update: I figured out that you don't even have to convert the certificates into proper format. Simply rename
+**1. (Bundled)** **rootCA.pem** to **rootCA.crt**
+**2. (Raw)** **rootCA.pem** to **rootCA.crt** and **intermediateCA.pem** to **intermediateCA.crt**
+
+Now you are able to install the certificate(s) by double-clicking the file, selecting the store location *current user* (for me) or *local machine* and by placing them in **Trusted Root Certification Authorities** store. Confirm the installation.
 
 To verify that the certificate has been installed successfully, do the following:
 - run **windows key + r**, type **mmc** and click *file -> add or remove snap-ins -> certificates -> add -> my user account > finish > ok* 
