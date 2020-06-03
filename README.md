@@ -259,18 +259,17 @@ And upload them to your routers */etc/* directory (or another directory if you c
 As I mentioned before I created a **ssl** subdir in my routers */www/* folder. Here you can upload both .crl files (**intermediateCA.crl** and **rootCA.crl**) as well as the **rootCA.pem** + **intermediateCA.pem**. Notice that these files are also referenced in the config files. Change the location path if your config files are different.
 
 To finish the installation process:
-1. (Bundled)** add the rootCA certificate to your machines trusted certificate store.
-2. (Raw)** add the rootCA as well as the intermediateCA certificate to your machines trusted certificate store.
+1. **(Bundled)** add the rootCA certificate to your machines trusted certificate store.
+2. **(Raw)** add the rootCA as well as the intermediateCA certificate to your machines trusted certificate store.
 
 ~~For windows you first convert the **rootCA.pem** to the proper .DER format by issuing the following command
 ```
 openssl x509 -outform der -in rootCA.pem -out rootCA.crt
 ```
 ~~
-
-Update: I figured out that you don't even have to convert the certificates into proper format. Simply rename
-**1. (Bundled)** **rootCA.pem** to **rootCA.crt**
-**2. (Raw)** **rootCA.pem** to **rootCA.crt** and **intermediateCA.pem** to **intermediateCA.crt**
+Update: I figured out that you don't even have to convert the certificates into proper format. Simply rename:
+1. **(Bundled)** **rootCA.pem** to **rootCA.crt**
+2. **(Raw)** **rootCA.pem** to **rootCA.crt** and **intermediateCA.pem** to **intermediateCA.crt**
 
 Now you are able to install the certificate(s) by double-clicking the file, selecting the store location *current user* (for me) or *local machine* and by placing them in **Trusted Root Certification Authorities** store. Confirm the installation.
 
