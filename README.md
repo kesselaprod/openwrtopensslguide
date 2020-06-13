@@ -391,7 +391,7 @@ curl -v https://mylocalrouter.localdomain
 
 ***
 
-### Credits
+### REFERENCES
 
 In case of any problems you can also check out the following links which where helpful to me in the past (thanks to all participants):
 - https://wiki.openssl.org/index.php/Command_Line_Utilities#Client_Certificates_AKA_pkcs12
